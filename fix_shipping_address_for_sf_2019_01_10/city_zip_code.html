@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+ <script src="./zip_code_data.js" type="text/javascript"></script>
+ <script src="./new_districts.js" type="text/javascript"></script>
+<script>
+	
+	var provinceData = provinceJson //省市区
+	var zipCodeData = zipCode //全国邮编
+	var allArr = [] 
+	var zipCodeObject = {}
+	var key = ''
+
+	var zip_code =  ''
+
+
+	let zipCodeStateArray = [] 
+
+	let zipCodeCityArray = []
+
+	let zipCodeDistictArray = []
+
+	var districtNotArray = []
+
+
+	//生成zip_code里面省份的name 的数组
+	zipCodeData.forEach(function(zipCodeState, index){
+
+		zipCodeStateArray.push(zipCodeState.name)
+
+		zipCodeState.children.forEach(function(zipCodeCity, index){
+
+			zipCodeCityArray.push(zipCodeCity.name)
+
+
+			if (!zipCodeCity.children) {
+
+				console.log(zipCodeCity.name)
+
+			}
+
+			if (zipCodeCity.children) {
+
+				zipCodeCity.children.forEach(function(zipCodeDistict, index){
+
+					zipCodeDistictArray.push(zipCodeDistict.name)
+
+				})
+			}
+
+		})
+	
+	})
+
+
+
+	provinceData.forEach(function(state,index){
+
+		let stateItem = Object.keys(state)[0] //市的数组
+
+		if (zipCodeStateArray.includes(stateItem)) { // 省级名字匹配成功
+
+
+			state[stateItem].forEach(function(city,index){
+
+				//console.log(city)
+
+				let cityItem = Object.keys(city)[0] // 区的数组
+
+
+				let cityArray = city[cityItem]
+
+				if (!cityArray[0]) {
+
+					//console.log(cityItem)
+
+					zipCodeData.forEach(function(zipCodeState, index){
+
+						zipCodeState.children.forEach(function(zipCodeCity, index){
+
+							if (zipCodeCity.name === cityItem) {
+
+								allArr = [] 
+
+								zip_code = zipCodeCity.zipcode
+
+								key = stateItem + cityItem + districtItem
+
+								zipCodeObject[key] = zip_code
+
+								allArr.push(zipCodeObject)
+
+								//allArr.push(JSON.parse('{"'+ key + '": "' + zip_code + '"}'))
+
+							}
+						})
+					
+					})
+
+				}
+
+				
+
+				if (zipCodeCityArray.includes(cityItem)) {
+
+					city[cityItem].forEach(function(district, index){
+
+						let districtItem = district // 每一个区
+
+						if (zipCodeDistictArray.includes(districtItem)) {
+
+							//districtNotArray.push(districtItem)
+
+							zipCodeData.forEach(function(zipCodeState, index){
+
+								if (zipCodeState.children) {
+
+									zipCodeState.children.forEach(function(zipCodeCity, index){
+
+										if (zipCodeCity.children) {
+
+											zipCodeCity.children.forEach(function(zipCodeDistict, index){
+												
+												if (zipCodeDistict.name === districtItem) {
+
+													allArr = [] 
+
+													zip_code = zipCodeDistict.zipcode
+
+													key = stateItem + cityItem + districtItem
+
+													zipCodeObject[key] = zip_code
+
+													allArr.push(zipCodeObject)
+
+													//allArr.push(JSON.parse('{"'+ key + '": "' + zip_code + '"}'))
+
+													//console.log(allArr)
+												}
+
+											})
+										}
+
+									})
+
+								}
+							
+							})
+							
+						}
+
+						if (!zipCodeDistictArray.includes(districtItem)) {
+
+							//districtNotArray.push(districtItem)
+						
+							zipCodeData.forEach(function(zipCodeState, index){
+
+								zipCodeState.children.forEach(function(zipCodeCity, index){
+
+									if (zipCodeCity.name === cityItem) {
+
+										allArr = [] 
+
+										zip_code = zipCodeCity.zipcode
+
+										key = stateItem + cityItem + districtItem
+
+										zipCodeObject[key] = zip_code
+
+										allArr.push(zipCodeObject)
+
+										//allArr.push(JSON.parse('{"'+ key + '": "' + zip_code + '"}'))
+
+									}
+								})
+							
+							})
+
+						}
+
+							//console.log('not in the districtData' + district)				
+
+					})
+
+				}
+
+				if (!zipCodeCityArray.includes(cityItem)) { //省级名字不匹配
+
+					//console.log('not in the cityData' + cityItem)
+					//districtNotArray.push(cityItem)
+
+					city[cityItem].forEach(function(district, index){
+
+						let districtItem = district // 每一个区
+
+						zipCodeData.forEach(function(zipCodeState, index){
+
+							if (zipCodeState.name === stateItem) {
+
+								allArr = [] 
+
+								zip_code = zipCodeState.zipcode
+
+								key = stateItem + cityItem + districtItem
+
+								zipCodeObject[key] = zip_code
+
+								allArr.push(zipCodeObject)
+
+								//allArr.push(JSON.parse('{"'+ key + '": "' + zip_code + '"}'))
+
+							}
+						
+						})			
+
+					})
+
+				}
+
+			})
+
+		}
+
+		if (!zipCodeStateArray.includes(stateItem)) { //省级名字不匹配
+
+			//console.log('not in the stateData' + stateItem)
+		}
+
+		
+	})
+
+	console.log(districtNotArray.length)
+
+	console.log(Object.keys(allArr[0]))
+
+	document.write(JSON.stringify(allArr))
+
+</script>
+</head>
+<body>
+</body>
+</html>
